@@ -4,7 +4,10 @@ use serde_json::Value;
 use std::error::Error;
 use url::{ParseError, Url};
 
-use crate::schemas::webhook::{RegisterWebhookRequest, UpdateWebhookRequest};
+use crate::schemas::{
+    template::ListTemplatesResponse,
+    webhook::{RegisterWebhookRequest, UpdateWebhookRequest},
+};
 
 pub struct HeyGenBot {
     api_key: String,
@@ -150,16 +153,11 @@ impl HeyGenBot {
     }
 
     /// Retrieves all templates.
-    pub async fn list_templates(&self) -> Result<Value, Box<dyn Error>> {
+    pub async fn list_templates(&self) -> Result<ListTemplatesResponse, Box<dyn Error>> {
         let response = self.build_request(Method::GET, "templates")?.send().await?;
-        let status = response.status();
         let body = response.text().await?;
 
-        if !status.is_success() {
-            return Err(format!("HTTP Error {}: {}", status, body).into());
-        }
-
-        let json: Value = serde_json::from_str(&body)?;
+        let json: ListTemplatesResponse = serde_json::from_str(&body)?;
 
         Ok(json)
     }
