@@ -15,7 +15,7 @@ pub struct HeyGenBot {
 impl HeyGenBot {
     /// Creates a new HeyGenBot instance with an API key and a base URL.
     pub fn new(api_key: String, base_url: Option<&str>) -> Result<Self, ParseError> {
-        let base_url = Url::parse(base_url.unwrap_or("https://api.heygen.com/v1/webhook/"))?;
+        let base_url = Url::parse(base_url.unwrap_or("https://api.heygen.com/v1/"))?;
         Ok(Self {
             api_key,
             base_url,
@@ -99,29 +99,132 @@ impl HeyGenBot {
     }
 
     /// Retrieves all avatars.
-    pub async fn get_all_avatars(&self) -> Result<Value> {
-        let response = self
-            .build_request(Method::GET, "avatars")?
-            .send()
-            .await?
-            .json::<Value>()
-            .await?;
+    pub async fn list_all_avatars(&self) -> Result<Value, Box<dyn Error>> {
+        let response = self.build_request(Method::GET, "avatars")?.send().await?;
 
-        Ok(response)
+        let status = response.status();
+        let body = response.text().await?;
+
+        if !status.is_success() {
+            return Err(format!("HTTP Error {}: {}", status, body).into());
+        }
+        let json: Value = serde_json::from_str(&body)?;
+
+        Ok(json)
     }
 
-    // Generate avatar videos
     pub async fn generate_avatar_video(&self, payload: Value) -> Result<Value, Box<dyn Error>> {
-        // let url = "https://api.heygen.com/v2/video/generate";
-
         let response = self
-            .build_request(Method::POST, "generate")?
+            .build_request(Method::POST, "video/generate")?
             .json(&payload)
             .send()
-            .await?
-            .json::<Value>()
             .await?;
 
-        Ok(response)
+        let status = response.status();
+        let body = response.text().await?;
+
+        if !status.is_success() {
+            return Err(format!("HTTP Error {}: {}", status, body).into());
+        }
+
+        let json: Value = serde_json::from_str(&body)?;
+
+        Ok(json)
+    }
+
+    /// Retrieves specific video details.
+    pub async fn retrieve_video_details(&self, video_id: &str) -> Result<Value, Box<dyn Error>> {
+        let path = format!("video_status.get?video_id={}", video_id);
+
+        let response = self.build_request(Method::GET, &path)?.send().await?;
+        let status = response.status();
+        let body = response.text().await?;
+
+        if !status.is_success() {
+            return Err(format!("HTTP Error {}: {}", status, body).into());
+        }
+
+        let json: Value = serde_json::from_str(&body)?;
+
+        Ok(json)
+    }
+
+    /// Retrieves all templates.
+    pub async fn list_templates(&self) -> Result<Value, Box<dyn Error>> {
+        let response = self.build_request(Method::GET, "templates")?.send().await?;
+        let status = response.status();
+        let body = response.text().await?;
+
+        if !status.is_success() {
+            return Err(format!("HTTP Error {}: {}", status, body).into());
+        }
+
+        let json: Value = serde_json::from_str(&body)?;
+
+        Ok(json)
+    }
+
+    /// Retrieves specific template details.
+    pub async fn retrieve_template_details(
+        &self,
+        template_id: &str,
+    ) -> Result<Value, Box<dyn Error>> {
+        let path = format!("template/{}", template_id);
+
+        let response = self.build_request(Method::GET, &path)?.send().await?;
+        let status = response.status();
+        let body = response.text().await?;
+
+        if !status.is_success() {
+            return Err(format!("HTTP Error {}: {}", status, body).into());
+        }
+
+        let json: Value = serde_json::from_str(&body)?;
+
+        Ok(json)
+    }
+
+    // Retrieves specific template details.
+    pub async fn generate_video_from_template(
+        &self,
+        template_id: &str,
+        payload: Value,
+    ) -> Result<Value, Box<dyn Error>> {
+        let path = format!("template/{}/generate", template_id);
+
+        let response = self
+            .build_request(Method::POST, &path)?
+            .json(&payload)
+            .send()
+            .await?;
+
+        let status = response.status();
+        let body = response.text().await?;
+
+        if !status.is_success() {
+            return Err(format!("HTTP Error {}: {}", status, body).into());
+        }
+
+        let json: Value = serde_json::from_str(&body)?;
+
+        Ok(json)
+    }
+
+    /// Lists videos with optional limit
+    pub async fn list_videos(&self, limit: u32) -> Result<Value, Box<dyn Error>> {
+        let path = format!("video.list?limit={}", limit);
+
+        let response = self.build_request(Method::GET, &path)?.send().await?;
+
+        let status = response.status();
+        let body = response.text().await?;
+
+        if !status.is_success() {
+            return Err(format!("HTTP Error {}: {}", status, body).into());
+        }
+
+        let json: Value = serde_json::from_str(&body)?;
+
+        Ok(json)
     }
 }
