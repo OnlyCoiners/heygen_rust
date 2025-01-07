@@ -109,4 +109,19 @@ impl HeyGenBot {
 
         Ok(response)
     }
+
+    // Generate avatar videos
+    pub async fn generate_avatar_video(&self, payload: Value) -> Result<Value, Box<dyn Error>> {
+        // let url = "https://api.heygen.com/v2/video/generate";
+
+        let response = self
+            .build_request(Method::POST, "generate")?
+            .json(&payload)
+            .send()
+            .await?
+            .json::<Value>()
+            .await?;
+
+        Ok(response)
+    }
 }
