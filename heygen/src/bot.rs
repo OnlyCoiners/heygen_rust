@@ -1,11 +1,13 @@
 use anyhow::Result;
-use reqwest::{Client, Method, RequestBuilder};
+use reqwest::{Client, Method, RequestBuilder, StatusCode};
 use serde_json::Value;
 use std::error::Error;
 use url::{ParseError, Url};
 
 use crate::schemas::{
-    template::ListTemplatesResponse,
+    list_videos::{ListErrorData, ListVideosResponse},
+    template::{ListTemplatesResponse, TemplateDetailsResponse, TemplateError, TemplateErrorData},
+    video::{ErrorData, VideoDetailsResponse, VideoError, VideoResponse},
     webhook::{RegisterWebhookRequest, UpdateWebhookRequest},
 };
 
@@ -116,7 +118,10 @@ impl HeyGenBot {
         Ok(json)
     }
 
-    pub async fn generate_avatar_video(&self, payload: Value) -> Result<Value, Box<dyn Error>> {
+    pub async fn create_avatar_video(
+        &self,
+        payload: Value,
+    ) -> Result<VideoResponse, Box<dyn Error>> {
         let response = self
             .build_request(Method::POST, "video/generate")?
             .json(&payload)
@@ -127,16 +132,24 @@ impl HeyGenBot {
         let body = response.text().await?;
 
         if !status.is_success() {
-            return Err(format!("HTTP Error {}: {}", status, body).into());
+            if status.as_u16() == StatusCode::NOT_FOUND.as_u16() && !body.contains("internal_error")
+            {
+                return Ok(VideoResponse::error(ErrorData {
+                    message: format!("{} {}", status, body),
+                    code: StatusCode::NOT_FOUND.as_str().to_string(),
+                }));
+            }
         }
+        let video_response: VideoResponse = serde_json::from_str(&body)?;
 
-        let json: Value = serde_json::from_str(&body)?;
-
-        Ok(json)
+        Ok(video_response)
     }
 
     /// Retrieves specific video details.
-    pub async fn retrieve_video_details(&self, video_id: &str) -> Result<Value, Box<dyn Error>> {
+    pub async fn retrieve_video_details(
+        &self,
+        video_id: &str,
+    ) -> Result<VideoDetailsResponse, Box<dyn Error>> {
         let path = format!("video_status.get?video_id={}", video_id);
 
         let response = self.build_request(Method::GET, &path)?.send().await?;
@@ -144,42 +157,66 @@ impl HeyGenBot {
         let body = response.text().await?;
 
         if !status.is_success() {
-            return Err(format!("HTTP Error {}: {}", status, body).into());
+            if status.as_u16() == StatusCode::NOT_FOUND.as_u16() && !body.contains("internal_error")
+            {
+                return Ok(VideoDetailsResponse::error(VideoError {
+                    message: format!("{} {}", status, body),
+                    code: 404,
+                    detail: Some("Not found".to_string()),
+                }));
+            }
         }
+        let video_response: VideoDetailsResponse = serde_json::from_str(&body)?;
 
-        let json: Value = serde_json::from_str(&body)?;
-
-        Ok(json)
+        Ok(video_response)
     }
 
     /// Retrieves all templates.
     pub async fn list_templates(&self) -> Result<ListTemplatesResponse, Box<dyn Error>> {
         let response = self.build_request(Method::GET, "templates")?.send().await?;
+
+        let status = response.status();
         let body = response.text().await?;
 
-        let json: ListTemplatesResponse = serde_json::from_str(&body)?;
+        if !status.is_success() {
+            if status.as_u16() == StatusCode::NOT_FOUND.as_u16() && !body.contains("internal_error")
+            {
+                return Ok(ListTemplatesResponse::error(TemplateErrorData {
+                    message: format!("{} {}", status, body),
+                    code: StatusCode::NOT_FOUND.as_str().to_string(),
+                }));
+            }
+        }
 
-        Ok(json)
+        let template_response: ListTemplatesResponse = serde_json::from_str(&body)?;
+
+        Ok(template_response)
     }
 
     /// Retrieves specific template details.
     pub async fn retrieve_template_details(
         &self,
         template_id: &str,
-    ) -> Result<Value, Box<dyn Error>> {
+    ) -> Result<TemplateDetailsResponse, Box<dyn Error>> {
         let path = format!("template/{}", template_id);
 
         let response = self.build_request(Method::GET, &path)?.send().await?;
+
         let status = response.status();
         let body = response.text().await?;
 
         if !status.is_success() {
-            return Err(format!("HTTP Error {}: {}", status, body).into());
+            if status.as_u16() == StatusCode::NOT_FOUND.as_u16() && !body.contains("internal_error")
+            {
+                return Ok(TemplateDetailsResponse::error(TemplateError {
+                    message: format!("{} {}", status, body),
+                    code: "404".to_string(),
+                }));
+            }
         }
+        let template_response: TemplateDetailsResponse = serde_json::from_str(&body)?;
 
-        let json: Value = serde_json::from_str(&body)?;
-
-        Ok(json)
+        Ok(template_response)
     }
 
     // Retrieves specific template details.
@@ -187,7 +224,7 @@ impl HeyGenBot {
         &self,
         template_id: &str,
         payload: Value,
-    ) -> Result<Value, Box<dyn Error>> {
+    ) -> Result<VideoResponse, Box<dyn Error>> {
         let path = format!("template/{}/generate", template_id);
 
         let response = self
@@ -200,16 +237,21 @@ impl HeyGenBot {
         let body = response.text().await?;
 
         if !status.is_success() {
-            return Err(format!("HTTP Error {}: {}", status, body).into());
+            if status.as_u16() == StatusCode::NOT_FOUND.as_u16() && !body.contains("internal_error")
+            {
+                return Ok(VideoResponse::error(ErrorData {
+                    message: format!("{} {}", status, body),
+                    code: StatusCode::NOT_FOUND.as_str().to_string(),
+                }));
+            }
         }
+        let video_response: VideoResponse = serde_json::from_str(&body)?;
 
-        let json: Value = serde_json::from_str(&body)?;
-
-        Ok(json)
+        Ok(video_response)
     }
 
     /// Lists videos with optional limit
-    pub async fn list_videos(&self, limit: u32) -> Result<Value, Box<dyn Error>> {
+    pub async fn list_videos(&self, limit: u32) -> Result<ListVideosResponse, Box<dyn Error>> {
         let path = format!("video.list?limit={}", limit);
 
         let response = self.build_request(Method::GET, &path)?.send().await?;
@@ -218,11 +260,16 @@ impl HeyGenBot {
         let body = response.text().await?;
 
         if !status.is_success() {
-            return Err(format!("HTTP Error {}: {}", status, body).into());
+            if status.as_u16() == StatusCode::NOT_FOUND.as_u16() && !body.contains("internal_error")
+            {
+                return Ok(ListVideosResponse::error(ListErrorData {
+                    message: format!("{} {}", status, body),
+                    code: 404,
+                }));
+            }
         }
+        let video_response: ListVideosResponse = serde_json::from_str(&body)?;
 
-        let json: Value = serde_json::from_str(&body)?;
-
-        Ok(json)
+        Ok(video_response)
     }
 }

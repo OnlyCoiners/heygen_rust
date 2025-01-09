@@ -1,5 +1,5 @@
 use anyhow::Result;
-use heygen::{bot::HeyGenBot, settings::SETTINGS};
+use heygen::{bot::HeyGenBot, examples_settings::SETTINGS};
 use serde_json::json;
 use tokio;
 
@@ -37,15 +37,15 @@ async fn main() -> Result<()> {
         .generate_video_from_template(&template_id, payload)
         .await
     {
-        Ok(response) => {
-            if let Some(data) = response.get("data") {
-                println!(
-                    "Video generated successfully, video_id: {}",
-                    data.get("video_id").unwrap()
-                );
+        Ok(response) => match response.data {
+            Some(data) => println!("Video generated successfully, video_id: {}", data.video_id),
+            None => {
+                if let Some(error) = response.error {
+                    eprintln!("API error: {}, code: {}", error.message, error.code);
+                }
             }
-        }
-        Err(e) => eprintln!("Error: {}", e),
+        },
+        Err(e) => eprintln!("Request error: {}", e),
     }
 
     Ok(())

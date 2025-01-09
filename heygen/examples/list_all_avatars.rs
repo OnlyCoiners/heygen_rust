@@ -1,5 +1,5 @@
 use anyhow::Result;
-use heygen::{bot::HeyGenBot, settings::SETTINGS};
+use heygen::{bot::HeyGenBot, examples_settings::SETTINGS};
 use tokio;
 
 #[tokio::main]

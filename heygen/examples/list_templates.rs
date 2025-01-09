@@ -1,5 +1,5 @@
 use anyhow::Result;
-use heygen::{bot::HeyGenBot, schemas::template::ListTemplatesResponse, settings::SETTINGS};
+use heygen::{bot::HeyGenBot, examples_settings::SETTINGS};
 use tokio;
 
 #[tokio::main]
@@ -8,35 +8,28 @@ async fn main() -> Result<()> {
 
     let bot = HeyGenBot::new(api_key, Some("https://api.heygen.com/v2/"))?;
 
-    let response = bot.list_templates().await;
-
-    match response {
-        Ok(ListTemplatesResponse {
-            data: Some(template_list_data),
-            error: None,
-        }) => {
-            println!(
-                "Template list retrieved sucessfully: {:?}",
-                template_list_data
-            );
-        }
-        Ok(ListTemplatesResponse {
-            data: None,
-            error: Some(error_data),
-        }) => {
-            eprintln!(
-                "Failed to list templates. Error code: {}, message: {}",
-                error_data.code, error_data.message
-            );
-        }
-        Ok(_) => {
-            // Unexpected case: Handle it gracefully
-            eprintln!("Unexpected response format received.");
-        }
-        Err(e) => {
-            // Handle any other errors (e.g., network issues, deserialization errors)
-            eprintln!("Error occurred while listing templates: {}", e);
-        }
+    match bot.list_templates().await {
+        Ok(response) => match response.data {
+            Some(data) => {
+                if data.templates.len() <= 0 {
+                    println!("No templates on your account yet! Make sure that you are premium before retrieving and creating templates.")
+                } else {
+                    println!("Templates retrieved successfully:");
+                }
+                for template in data.templates {
+                    println!(
+                        "- Name: {}, ID: {}, Thumbnail: {}",
+                        template.name, template.template_id, template.thumbnail_image_url
+                    );
+                }
+            }
+            None => {
+                if let Some(error) = response.error {
+                    eprintln!("API error: {}, code: {}", error.message, error.code);
+                }
+            }
+        },
+        Err(e) => eprintln!("Request error: {}", e),
     }
 
     Ok(())

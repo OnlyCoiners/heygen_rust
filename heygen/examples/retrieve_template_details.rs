@@ -1,5 +1,5 @@
 use anyhow::Result;
-use heygen::{bot::HeyGenBot, settings::SETTINGS};
+use heygen::{bot::HeyGenBot, examples_settings::SETTINGS};
 use tokio;
 
 #[tokio::main]
@@ -8,13 +8,18 @@ async fn main() -> Result<()> {
 
     let bot = HeyGenBot::new(api_key, Some("https://api.heygen.com/v2/"))?;
 
-    match bot
-        .retrieve_template_details("bc0756ac2b0b491f9e5d3b9f28e35f7b")
-        .await
-    {
-        Ok(response) => {
-            println!("response: {}", response);
-        }
+    // let template = "bc0756ac2b0b491f9e5d3b9f28e35f7b";
+    let template = "44f4ae77168d45cfbc6dcbb87ea03b25";
+
+    match bot.retrieve_template_details(&template).await {
+        Ok(response) => match response.data {
+            Some(data) => println!("Template Details: {:#?}", data),
+            None => {
+                if let Some(error) = response.error {
+                    eprintln!("API error: {}, code: {}", error.message, error.code);
+                }
+            }
+        },
         Err(e) => eprintln!("Error: {}", e),
     }
 
