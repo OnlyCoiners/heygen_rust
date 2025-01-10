@@ -1,9 +1,13 @@
-# heygen
+# Heygen
 
 `heygen` is a Rust SDK for interacting with the HeyGen API, providing an ergonomic and type-safe way to create and manage AI-generated videos.
 
 [![Crates.io](https://img.shields.io/crates/v/heygen)](https://crates.io/crates/heygen)
 [![Documentation](https://docs.rs/heygen/badge.svg)](https://docs.rs/heygen)
+
+### Help us by using our affiliate link!
+
+Join Heygen using [this link](https://heygen.com/?sid=rewardful&via=onlycoiners) and you will be rewarding our work! Thank you!
 
 ## High level features
 
@@ -96,7 +100,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-heygen = "0.1.0"
+heygen = "0.1.1"
 ```
 
 ## Documentation

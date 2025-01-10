@@ -6,7 +6,7 @@ use tokio;
 async fn main() -> Result<()> {
     let api_key = SETTINGS.api_heygen_token.clone();
 
-    let bot = HeyGenBot::new(api_key, Some("https://api.heygen.com/v2/"))?;
+    let bot = HeyGenBot::new(api_key)?;
 
     match bot.list_templates().await {
         Ok(response) => match response.data {

@@ -6,13 +6,14 @@ use tokio;
 async fn main() -> Result<()> {
     let api_key = SETTINGS.api_heygen_token.clone();
 
-    let bot = HeyGenBot::new(api_key, Some("https://api.heygen.com/v1/"))?;
+    let bot = HeyGenBot::new(api_key)?;
 
-    // let video_id = "9514f56a26864050b8d40ef7973a4859";
-    let video_id = "4ed7aef4959b40dd88d51757990c38c9";
+    // Put your video_id
+    let video_id = "7b56395626cf4ea7aa9a1b2318aec449";
 
     match bot.retrieve_video_details(&video_id).await {
         Ok(response) => {
+            println!("response: {:?}", response);
             let video_details = response.data.unwrap();
             if let Some(video_error) = video_details.error {
                 eprintln!(

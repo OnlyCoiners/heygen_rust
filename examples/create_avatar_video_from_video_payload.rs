@@ -12,7 +12,7 @@ async fn main() -> Result<()> {
     // NOT WORKING RIGHT NOW
     let api_key = SETTINGS.api_heygen_token.clone();
 
-    let bot = HeyGenBot::new(api_key, Some("https://api.heygen.com/v2/"))?;
+    let bot = HeyGenBot::new(api_key)?;
 
     // let payload = json!({
     //     "video_inputs": [

@@ -13,24 +13,21 @@ use crate::schemas::{
 
 pub struct HeyGenBot {
     pub api_key: String,
-    pub base_url: Url,
+    // pub base_url: Url,
     pub client: Client,
 }
 
 impl HeyGenBot {
     /// Creates a new HeyGenBot instance with an API key and a base URL.
-    pub fn new(api_key: String, base_url: Option<&str>) -> Result<Self, ParseError> {
-        let base_url = Url::parse(base_url.unwrap_or("https://api.heygen.com/v1/"))?;
+    pub fn new(api_key: String) -> Result<Self, ParseError> {
         Ok(Self {
             api_key,
-            base_url,
             client: Client::new(),
         })
     }
 
     /// Helper method to create a RequestBuilder with the base URL and a specific path.
-    fn build_request(&self, method: Method, path: &str) -> Result<RequestBuilder, ParseError> {
-        let url = self.base_url.join(path)?;
+    fn build_request(&self, method: Method, url: Url) -> Result<RequestBuilder, ParseError> {
         Ok(self
             .client
             .request(method, url.as_str())
@@ -47,8 +44,10 @@ impl HeyGenBot {
             url: Url::parse(endpoint_url)?,
             events: events.into_iter().map(String::from).collect(),
         };
+
+        let url = Url::parse("https://api.heygen.com/v1/webhook/endpoint.add")?;
         let response = self
-            .build_request(Method::POST, "endpoint.add")?
+            .build_request(Method::POST, url)?
             .json(&payload)
             .send()
             .await?
@@ -58,8 +57,9 @@ impl HeyGenBot {
     }
 
     pub async fn list_webhooks(&self) -> Result<Value> {
+        let url = Url::parse("https://api.heygen.com/v1/webhook/endpoint.list")?;
         let response = self
-            .build_request(Method::GET, "endpoint.list")?
+            .build_request(Method::GET, url)?
             .send()
             .await?
             .json::<Value>()
@@ -79,9 +79,10 @@ impl HeyGenBot {
             url: Url::parse(new_url)?,
             events: events.into_iter().map(String::from).collect(),
         };
+        let url = Url::parse("https://api.heygen.com/v1/webhook/endpoint.update")?;
 
         let response = self
-            .build_request(Method::PATCH, "endpoint.update")?
+            .build_request(Method::PATCH, url)?
             .json(&payload)
             .send()
             .await?
@@ -92,9 +93,15 @@ impl HeyGenBot {
     }
 
     pub async fn delete_webhook(&self, endpoint_id: &str) -> Result<Value, Box<dyn Error>> {
-        let path = format!("endpoint.delete?endpoint_id={}", endpoint_id);
+        let url = Url::parse(
+            format!(
+                "https://api.heygen.com/v1/webhook/endpoint.delete?endpoint_id={}",
+                endpoint_id
+            )
+            .as_str(),
+        )?;
         let response = self
-            .build_request(Method::DELETE, &path)?
+            .build_request(Method::DELETE, url)?
             .send()
             .await?
             .json::<Value>()
@@ -105,7 +112,8 @@ impl HeyGenBot {
 
     /// Retrieves all avatars.
     pub async fn list_all_avatars(&self) -> Result<Value, Box<dyn Error>> {
-        let response = self.build_request(Method::GET, "avatars")?.send().await?;
+        let url = Url::parse("https://api.heygen.com/v2/avatars")?;
+        let response = self.build_request(Method::GET, url)?.send().await?;
 
         let status = response.status();
         let body = response.text().await?;
@@ -134,7 +142,7 @@ impl HeyGenBot {
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let client = HeyGenBot::new(api_key, Some("https://api.heygen.com/v2/"));
+    ///     let client = HeyGenBot::new(api_key);
     ///     let payload = json!({
     ///         "video_inputs": [
     ///             {
@@ -171,8 +179,9 @@ impl HeyGenBot {
         &self,
         payload: Value,
     ) -> Result<VideoResponse, Box<dyn Error>> {
+        let url = Url::parse("https://api.heygen.com/v2/video/generate")?;
         let response = self
-            .build_request(Method::POST, "video/generate")?
+            .build_request(Method::POST, url)?
             .json(&payload)
             .send()
             .await?;
@@ -205,8 +214,9 @@ impl HeyGenBot {
         &self,
         payload: VideoPayload,
     ) -> Result<VideoResponse, Box<dyn Error>> {
+        let url = Url::parse("https://api.heygen.com/v2/video/generate")?;
         let response = self
-            .build_request(Method::POST, "video/generate")?
+            .build_request(Method::POST, url)?
             .json(&payload.as_json())
             .send()
             .await?;
@@ -242,9 +252,15 @@ impl HeyGenBot {
         &self,
         video_id: &str,
     ) -> Result<VideoDetailsResponse, Box<dyn Error>> {
-        let path = format!("video_status.get?video_id={}", video_id);
+        let url = Url::parse(
+            format!(
+                "https://api.heygen.com/v1/video_status.get?video_id={}",
+                video_id
+            )
+            .as_str(),
+        )?;
 
-        let response = self.build_request(Method::GET, &path)?.send().await?;
+        let response = self.build_request(Method::GET, url)?.send().await?;
         let status = response.status();
         let body = response.text().await?;
 
@@ -265,7 +281,8 @@ impl HeyGenBot {
 
     /// Retrieves all templates.
     pub async fn list_templates(&self) -> Result<ListTemplatesResponse, Box<dyn Error>> {
-        let response = self.build_request(Method::GET, "templates")?.send().await?;
+        let url = Url::parse("https://api.heygen.com/v2/templates")?;
+        let response = self.build_request(Method::GET, url)?.send().await?;
 
         let status = response.status();
         let body = response.text().await?;
@@ -290,9 +307,10 @@ impl HeyGenBot {
         &self,
         template_id: &str,
     ) -> Result<TemplateDetailsResponse, Box<dyn Error>> {
-        let path = format!("template/{}", template_id);
+        let url =
+            Url::parse(format!("https://api.heygen.com/v2/template/{}", template_id).as_str())?;
 
-        let response = self.build_request(Method::GET, &path)?.send().await?;
+        let response = self.build_request(Method::GET, url)?.send().await?;
 
         let status = response.status();
         let body = response.text().await?;
@@ -331,7 +349,7 @@ impl HeyGenBot {
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let client = HeyGenBot::new(api_key, Some("https://api.heygen.com/v2/"));
+    ///     let client = HeyGenBot::new(api_key);
     ///     let template_id = "your-template-id";
     ///     let payload = json!({
     ///         "test": true,
@@ -372,10 +390,16 @@ impl HeyGenBot {
         template_id: &str,
         payload: Value,
     ) -> Result<VideoResponse, Box<dyn Error>> {
-        let path = format!("template/{}/generate", template_id);
+        let url = Url::parse(
+            format!(
+                "https://api.heygen.com/v2/template/{}/generate",
+                template_id
+            )
+            .as_str(),
+        )?;
 
         let response = self
-            .build_request(Method::POST, &path)?
+            .build_request(Method::POST, url)?
             .json(&payload)
             .send()
             .await?;
@@ -399,9 +423,10 @@ impl HeyGenBot {
 
     /// Lists videos with optional limit
     pub async fn list_videos(&self, limit: u32) -> Result<ListVideosResponse, Box<dyn Error>> {
-        let path = format!("video.list?limit={}", limit);
+        let url =
+            Url::parse(format!("https://api.heygen.com/v1/video.list?limit={}", limit).as_str())?;
 
-        let response = self.build_request(Method::GET, &path)?.send().await?;
+        let response = self.build_request(Method::GET, url)?.send().await?;
 
         let status = response.status();
         let body = response.text().await?;

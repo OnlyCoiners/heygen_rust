@@ -7,7 +7,7 @@ use tokio;
 async fn main() -> Result<()> {
     let api_key = SETTINGS.api_heygen_token.clone();
 
-    let bot = HeyGenBot::new(api_key, Some("https://api.heygen.com/v2/"))?;
+    let bot = HeyGenBot::new(api_key)?;
 
     // Put your template_id here (this is mine and won't work with your key)
     let template_id = "bc0756ac2b0b491f9e5d3b9f28e35f7b";
