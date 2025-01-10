@@ -18,7 +18,7 @@ repository = "https://github.com/OnlyCoiners/heygen_rust"
 documentation = "https://docs.rs/heygen"
 keywords = ["heygen"]
 # https://crates.io/category_slugs, Use only what are inside the list up to 5.
-categories = ["AI", "content generation"] 
+categories = ["ai", "reqwest"] 
 readme = "README.md" 
 
 [dependencies]
