@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
                 }
                 for video in data.videos {
                     println!(
-                        "Title: {}\n ID: {}\n Status: {:?}\n Type: {:?}\n Created At: {}\n",
+                        "Title: {}\n ID: {}\n Status: {:?}\n Type: {:?}\n Created At: {:?}\n",
                         video.video_title,
                         video.video_id,
                         video.status,
@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
                 }
                 println!(
                     "Token for next set of videos (pagination): {}",
-                    data.token.unwrap()
+                    data.token.unwrap_or("No token available".to_string())
                 )
             }
             None => {

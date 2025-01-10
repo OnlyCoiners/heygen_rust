@@ -18,9 +18,9 @@ pub struct Video {
     pub video_id: String,
     pub video_title: String,
     pub status: VideoStatus,
-    pub created_at: i64,
+    pub created_at: Option<i64>,
     #[serde(rename = "type")]
-    pub video_type: VideoType,
+    pub video_type: Option<VideoType>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]

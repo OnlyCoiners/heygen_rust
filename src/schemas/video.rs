@@ -87,3 +87,64 @@ impl VideoDetailsResponse {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct VideoPayload {
+    // pub title: Option<String>,
+    // pub caption: Option<bool>,
+    pub video_inputs: Vec<VideoInput>,
+    pub dimension: Dimension,
+}
+
+impl VideoPayload {
+    pub fn as_json(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct VideoInput {
+    pub character: Character,
+    pub voice: Voice,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Character {
+    #[serde(rename = "type")]
+    pub char_type: String,
+    pub avatar_id: String,
+    pub avatar_style: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Voice {
+    #[serde(rename = "type")]
+    pub voice_type: String,
+    pub input_text: String,
+    pub voice_id: String,
+    pub speed: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Dimension {
+    pub height: u32,
+    pub width: u32,
+}
+
+impl Dimension {
+    /// Returns a dimension with width:1280 and height:720
+    pub fn landscape() -> Self {
+        Self {
+            width: 1280,
+            height: 720,
+        }
+    }
+
+    /// Returns a dimension with width:720 and height:1280
+    pub fn portrait() -> Self {
+        Self {
+            width: 720,
+            height: 1280,
+        }
+    }
+}
