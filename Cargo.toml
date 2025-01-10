@@ -3,25 +3,23 @@ name = "heygen"
 version = "0.1.1"
 edition = "2021"
 
-exclude = [
-    "examples_settings"
-]
+# exclude = [
+#     "examples_settings"
+# ]
 
 authors = [
   "OnlyCoiners Dev <dev@onlycoiners.com>",
-  "Sergio Tales <sergiotalesdev@onlycoiners.com>", # Include the name you want
+  "Sergio Tales <sergiotalesdev@onlycoiners.com>", 
 ]
 
-# TODO
-# Include more details here
-license = "MIT OR Apache-2.0" # Decide which license to use and also license file.
+license = "MIT" 
 description = "HeyGen API from Only Finance LTDA"
 repository = "https://github.com/OnlyCoiners/heygen_rust"
 documentation = "https://docs.rs/heygen"
 keywords = ["heygen"]
 # https://crates.io/category_slugs, Use only what are inside the list up to 5.
-categories = [] # Include more here
-readme = "README.md" # It will be used at https://crates.io/crates/heygen
+categories = ["AI", "content generation"] 
+readme = "README.md" 
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
