@@ -88,6 +88,8 @@ async fn main() {
 
 The [examples](examples/) directory contains various examples showcasing different features:
 
+To run an example use cargo run --example <example_file_name>
+
 ## Getting Started
 
 Add this to your `Cargo.toml`:

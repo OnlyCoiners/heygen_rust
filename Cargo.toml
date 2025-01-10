@@ -1,13 +1,29 @@
 [package]
 name = "heygen"
-version = "0.1.0"
+version = "0.0.0"
 edition = "2021"
+
+authors = [
+  "OnlyCoiners Dev <dev@onlycoiners.com>",
+  "Sergio Tales <sergiotalesdev@onlycoiners.com>", # Include the name you want
+]
+
+# TODO
+# Include more details here
+license = "MIT OR Apache-2.0" # Decide which license to use and also license file.
+description = "HeyGen API from Only Finance LTDA"
+repository = "https://github.com/OnlyCoiners/heygen_rust"
+documentation = "https://docs.rs/heygen"
+keywords = ["heygen"]
+# https://crates.io/category_slugs, Use only what are inside the list up to 5.
+categories = [] # Include more here
+readme = "README.md" # It will be used at https://crates.io/crates/heygen
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-reqwest = { version = "*", features = ["json", "multipart", "blocking"] }
+reqwest = { version = "0.12.12", features = ["json", "multipart", "blocking"] }
 url = {version = "2.5.4", features = ["serde"]}
 anyhow = "1.0.95"
 lazy_static = "1.5.0"
