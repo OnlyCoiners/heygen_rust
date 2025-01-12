@@ -1,11 +1,11 @@
 use anyhow::Result;
-use heygen::{bot::HeyGenBot, examples_settings::SETTINGS};
+use heygen::bot::HeyGenBot;
 use serde_json::json;
 use tokio;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let api_key = SETTINGS.api_heygen_token.clone();
+    let api_key = "<your-api-key>".to_string();
 
     let bot = HeyGenBot::new(api_key)?;
 

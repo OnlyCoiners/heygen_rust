@@ -148,3 +148,20 @@ impl Dimension {
         }
     }
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RemainingQuotaResponse {
+    pub error: Option<String>,
+    pub data: Option<Data>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Data {
+    pub remaining_quota: u32,
+    pub details: Details,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Details {
+    pub api: u32,
+}

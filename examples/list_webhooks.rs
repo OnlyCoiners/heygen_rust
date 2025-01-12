@@ -8,11 +8,13 @@ async fn main() -> Result<()> {
 
     let bot = HeyGenBot::new(api_key)?;
 
-    match bot.list_all_avatars().await {
+    match bot.list_webhooks().await {
         Ok(response) => {
-            println!("response: {}", response);
+            println!("Response: {}", response);
         }
-        Err(e) => eprintln!("Error: {}", e),
+        Err(e) => {
+            eprintln!("Error: {}", e);
+        }
     }
 
     Ok(())

@@ -35,6 +35,8 @@ impl HeyGenBot {
             .header("Accept", "application/json"))
     }
 
+    /// Register a new webhook, uses an endpoint_url:&str and a string vector of events to subscribe for, once the registered event triggers related to any video, it will send a POST request to the registered endpoint.
+    /// API reference: https://docs.heygen.com/reference/add-a-webhook-endpoint
     pub async fn register_webhook(
         &self,
         endpoint_url: &str,
@@ -56,6 +58,8 @@ impl HeyGenBot {
         Ok(response)
     }
 
+    /// List all the webhooks registered on the account, uses the api_key as identifier.
+    /// API reference: https://docs.heygen.com/reference/list-webhook-endpoints
     pub async fn list_webhooks(&self) -> Result<Value> {
         let url = Url::parse("https://api.heygen.com/v1/webhook/endpoint.list")?;
         let response = self
@@ -68,6 +72,22 @@ impl HeyGenBot {
         Ok(response)
     }
 
+    /// List all available webhook events for your account, these events will be used for registering the webhook.
+    /// API reference: https://docs.heygen.com/reference/list-available-webhook-events
+    pub async fn list_webhooks_available_events(&self) -> Result<Value> {
+        let url = Url::parse("https://api.heygen.com/v1/webhook/webhook.list")?;
+        let response = self
+            .build_request(Method::GET, url)?
+            .send()
+            .await?
+            .json::<Value>()
+            .await?;
+
+        Ok(response)
+    }
+
+    /// Updates the webhook, it receives a endpoint_id (the one you want to change, use list_webhooks to grab this information), a new_url which will be the new endpoint and a vector of strings representing the event list that you want to listen to.
+    /// API reference: https://docs.heygen.com/reference/update-a-webhook-endpoint
     pub async fn update_webhook(
         &self,
         endpoint_id: &str,
@@ -92,6 +112,8 @@ impl HeyGenBot {
         Ok(response)
     }
 
+    /// Deletes the webhook specified using its endpoint_id.
+    /// API reference: https://docs.heygen.com/reference/delete-a-webhook-endpoint
     pub async fn delete_webhook(&self, endpoint_id: &str) -> Result<Value, Box<dyn Error>> {
         let url = Url::parse(
             format!(
@@ -111,6 +133,7 @@ impl HeyGenBot {
     }
 
     /// Retrieves all avatars.
+    /// API reference: https://docs.heygen.com/reference/list-avatars-v2
     pub async fn list_all_avatars(&self) -> Result<Value, Box<dyn Error>> {
         let url = Url::parse("https://api.heygen.com/v2/avatars")?;
         let response = self.build_request(Method::GET, url)?.send().await?;
@@ -175,6 +198,7 @@ impl HeyGenBot {
     /// }
     /// ```
     ///
+    /// API reference: https://docs.heygen.com/reference/create-an-avatar-video-v2
     pub async fn create_avatar_video(
         &self,
         payload: Value,
@@ -210,6 +234,8 @@ impl HeyGenBot {
     }
 
     /// Create videos from a VideoPayload type, currently not working since the response that the serves makes is "Invalid json body"
+    /// Not working currently.
+    /// API reference: https://docs.heygen.com/reference/create-an-avatar-video-v2
     pub async fn create_avatar_video_from_video_payload(
         &self,
         payload: VideoPayload,
@@ -248,6 +274,7 @@ impl HeyGenBot {
     }
 
     /// Retrieves specific video details.
+    /// API reference: https://docs.heygen.com/reference/video-status
     pub async fn retrieve_video_details(
         &self,
         video_id: &str,
@@ -280,6 +307,7 @@ impl HeyGenBot {
     }
 
     /// Retrieves all templates.
+    /// API reference: https://docs.heygen.com/reference/list-templates-v2
     pub async fn list_templates(&self) -> Result<ListTemplatesResponse, Box<dyn Error>> {
         let url = Url::parse("https://api.heygen.com/v2/templates")?;
         let response = self.build_request(Method::GET, url)?.send().await?;
@@ -303,6 +331,7 @@ impl HeyGenBot {
     }
 
     /// Retrieves specific template details.
+    /// API reference: https://docs.heygen.com/reference/get-template-v2
     pub async fn retrieve_template_details(
         &self,
         template_id: &str,
@@ -385,6 +414,7 @@ impl HeyGenBot {
     /// - On success: returns a VideoResponse containing the video id
     /// - On failure: Returns an error with details about the failure.
     ///
+    /// API reference: https://docs.heygen.com/reference/generate-from-template-v2
     pub async fn generate_video_from_template(
         &self,
         template_id: &str,
@@ -421,7 +451,22 @@ impl HeyGenBot {
         Ok(video_response)
     }
 
-    /// Lists videos with optional limit
+    /// Retrieves the remaining amount of credits, you need to divide the "quota" by 60 in order to get the real credits number
+    /// API reference: https://docs.heygen.com/reference/get-remaining-quota-v2
+    pub async fn retrieve_remaining_credits(&self) -> Result<Value> {
+        let url = Url::parse("https://api.heygen.com/v1/webhook/endpoint.list")?;
+        let response = self
+            .build_request(Method::GET, url)?
+            .send()
+            .await?
+            .json::<Value>()
+            .await?;
+
+        Ok(response)
+    }
+
+    /// Lists videos from your account with optional limit
+    /// API reference: https://docs.heygen.com/reference/video-list
     pub async fn list_videos(&self, limit: u32) -> Result<ListVideosResponse, Box<dyn Error>> {
         let url =
             Url::parse(format!("https://api.heygen.com/v1/video.list?limit={}", limit).as_str())?;

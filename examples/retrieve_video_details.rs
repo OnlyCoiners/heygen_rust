@@ -1,15 +1,15 @@
 use anyhow::Result;
-use heygen::{bot::HeyGenBot, examples_settings::SETTINGS};
+use heygen::bot::HeyGenBot;
 use tokio;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let api_key = SETTINGS.api_heygen_token.clone();
+    let api_key = "<your-api-key>".to_string();
 
     let bot = HeyGenBot::new(api_key)?;
 
     // Put your video_id
-    let video_id = "7b56395626cf4ea7aa9a1b2318aec449";
+    let video_id = "6413c991cd414f9198212bcc2fbac54";
 
     match bot.retrieve_video_details(&video_id).await {
         Ok(response) => {

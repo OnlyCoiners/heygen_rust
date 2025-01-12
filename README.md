@@ -100,7 +100,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-heygen = "0.1.1"
+heygen = "0.1.2"
 ```
 
 ## Documentation
